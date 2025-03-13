@@ -3,14 +3,12 @@
 import os
 # sys.path.append( os.path.dirname( os.path.dirname( os.path.abspath(__file__) ) ) )
 
-import dataio, meta_modules, utils, training, loss_functions
+import dataio, meta_modules
 import matplotlib.pyplot as plt
 import numpy as np
-
 import torch
 from torch.utils.data import DataLoader
 import configargparse
-
 import imageio
 from functools import partial
 import random
@@ -18,6 +16,11 @@ from tqdm.autonotebook import tqdm
 import time
 import utils
 from torch.utils.tensorboard import SummaryWriter
+
+def cond_mkdir(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
 
 p = configargparse.ArgumentParser()
 p.add('-c', '--config_filepath', required=False, is_config_file=True, help='Path to config file.')
@@ -63,8 +66,12 @@ model = meta_modules.ConvolutionalNeuralProcessImplicit2DHypernet(in_features=im
 model.cuda()
 model.eval()
 
+def cond_mkdir(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
 root_path = os.path.join(opt.logging_root, opt.experiment_name)
-utils.cond_mkdir(root_path)
+cond_mkdir(root_path)
 
 
 # Load checkpoint
@@ -129,8 +136,8 @@ def to_uint8(img):
 def getTestMSE(dataloader, subdir):
     MSEs = []
     total_steps = 0
-    utils.cond_mkdir(os.path.join(root_path, subdir))
-    utils.cond_mkdir(os.path.join(root_path, 'ground_truth'))
+    cond_mkdir(os.path.join(root_path, subdir))
+    cond_mkdir(os.path.join(root_path, 'ground_truth'))
 
     with tqdm(total=len(dataloader)) as pbar:
         for step, (model_input, gt) in enumerate(dataloader):
